@@ -1,6 +1,15 @@
-.draggable {
+.holder,.slideContent{
+  position: relative;
+}
+.holder *,.slideContent *{
+  position: absolute !important;
+}
+.holder img,.slideContent img{
+  width: -webkit-fill-available;
+  height: -webkit-fill-available;
+}
+.draggable,.draggablewithimage {
     width: 25%;
-    min-height: 6.5em;
     /* margin: 1rem 0 0 1rem; */
     background-color: #29e;
     color: white;
