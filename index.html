@@ -3,20 +3,37 @@
 
     <!-- ccs files -->
 
+    <link rel="stylesheet" href="./css/pptxjs.css">
+    <link rel="stylesheet" href="./css/nv.d3.min.css">
     <!-- jquery -->
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+<!--    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="index.css">
     <link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<!--    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>-->
+<!--    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>-->
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+
     <!-- pptGenxJS -->
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.8.0/dist/pptxgen.bundle.js"></script>
 
+    <script type="text/javascript" src="./js/jszip.min.js"></script>
+    <script type="text/javascript" src="./js/filereader.js"></script>
+    <script type="text/javascript" src="./js/d3.min.js"></script>
+    <script type="text/javascript" src="./js/nv.d3.min.js"></script>
+    <script type="text/javascript" src="./js/divs2slides.js"></script>
+    <script type="text/javascript" src="./js/pptxjs.js"></script>
 
-    <!-- project js files -->
-    <script src="index.js"></script> 
+    <script type="text/javascript" src="./js/jquery.fullscreen-min.js"></script>
+
+
+
+
+
     <style>
         /*.holder{
             display: flex;
@@ -33,6 +50,17 @@
 
     <div class="container-fluid">
 
+        <div class="row">
+            <div id="warper">
+                <input id="uploadFileInput" type="file" />
+                <br><br>
+                <div id="container">
+                    <input id="fullscreen-btn" type="button" value="Fullscreen" />
+                    <br>
+                    <div  id="result"></div>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-9">
                 <div class="lsPptEditor">
@@ -56,6 +84,42 @@
         </div>
     </div>
 
+
+    <script type="text/javascript">
+        /*$(function() {
+            var oldWidth, oldMargin ,isFullscreenMode=false;
+            $("#fullscreen-btn").on("click", function(){
+
+                if(!isFullscreenMode){
+                    oldWidth = $("#result .slide").css("width");
+                    oldMargin = $("#result .slide").css("margin");
+                    $("#result .slide").css({
+                        "width": "99%",
+                        "margin": "0 auto"
+                    })
+                    $("#result").toggleFullScreen();
+                    isFullscreenMode = true;
+                }else{
+                    $("#result .slide").css({
+                        "width": oldWidth,
+                        "margin": oldMargin
+                    })
+                    $("#result").toggleFullScreen();
+                    isFullscreenMode = false;
+                }
+            });
+            $(document).bind("fullscreenchange", function() {
+                if(!$(document).fullScreen()){
+                    $("#result .slide").css({
+                        "width": oldWidth,
+                        "margin": oldMargin
+                    })
+                }
+            });
+        });*/
+    </script>
+    <!-- project js files -->
+    <script src="index.js"></script>
 
     <!-- interect IO -->
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
