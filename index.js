@@ -28,6 +28,7 @@ let plotSideSlides = (slides)=>{
             html += '</div></div>';
             $('.slidesHolder').append(html);
     });
+    $('.singleSlidePreview:first-child').click();
 
 };
 let currentSlide = false;
@@ -114,7 +115,7 @@ function stripHtml(html)
                 transition: "default", /** transition type: "slid","fade","default","random" , to show transition efects :transitionTime > 0.5 */
                 transitionTime: 1 /** transition time in seconds */
             },
-            isProcessDone : plotSideSlides
+            plotSlidedsIfDone : plotSideSlides
         });
 
 
@@ -166,28 +167,42 @@ jQuery(document).ready(function($){
     });*/
 
 /*---------Quill ends-------*/
+   function quillfontsizes() {
+        var x = 12;
+        let sizes = [];
+        for (var i = x; i <= 80; i += 0.5) {
+            sizes.push(`${i}px`);
+        }
+        return sizes;
+    };
+    const fontSizeArr = quillfontsizes();
 
+    var Size = Quill.import('attributors/style/size');
+    Size.whitelist = fontSizeArr;
+    Quill.register(Size, true);
     var ColorClass = Quill.import('attributors/class/color');
     var SizeStyle = Quill.import('attributors/style/size');
+
     Quill.register(ColorClass, true);
     Quill.register(SizeStyle, true);
 
     const toolbarOptions = [
+    [{ 'size': fontSizeArr }],
     ['bold', 'italic', 'underline', 'strike'],
-    ['blockquote', 'code-block'],
-    [{'header': 1}, {'header': 2}],
+    // ['blockquote', 'code-block'],
+    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
     [{'list': 'ordered'}, {'list': 'bullet'}],
     [{'script': 'sub'}, {'script': 'super'}],
     [{'indent': '-1'}, {'indent': '+1'}],
     [{'direction': 'rtl'}],
-    [{'size': ['small', false, 'large', 'huge']}],
-    ['link', 'image', 'video', 'formula'],
+    // ['link', 'image', 'video', 'formula'],
     [{'color': []}, {'background': []}],
-    [{'font': []}],
-    [{'align': []}]
+    // [{'font': []}],
+    [{'align': []}],
+    ['clean'],
     ];
 
-     var quill = new Quill('#tool-holder #quill-editor', {
+     window.quill = new Quill('#tool-holder #quill-editor', {
       modules: {
         toolbar: toolbarOptions
       },
@@ -199,7 +214,6 @@ jQuery(document).ready(function($){
      {
          if(target === undefined || target == ""){return;}
          // var quillHtml = quill.root.innerHTML;
-         console.log(target);
          let targetObj = $('div#holder .'+target);
          targetObj.html(quill.root.innerHTML).addClass('quilled');
          quillCancel();
@@ -209,17 +223,74 @@ jQuery(document).ready(function($){
         $('#holder .text-block').removeClass('editing-here');
         $('#tool-holder #quill-holder #quillapply').attr('to-apply', "")
      }
+
+     function getElementStyleInQuillObj(htmlObj){
+
+            let cssProps = {
+             "font-size" : "size",
+             "font-weight" : "bold",
+             "color" : "color",
+             // "font-style",
+             // "text-decoration",
+             "text-align" : "align"
+             // "position",
+             // "vertical-align"
+         }
+
+         let cssPropObj = {};
+         Object.keys(cssProps).forEach((prop)=>{
+             let styleValue = htmlObj.css(prop);
+             if(styleValue == "bold"){
+                styleValue = true;
+             }else if(styleValue == "inherit"){
+                 styleValue = "";
+             }else if(styleValue == undefined || styleValue == ""){
+                 styleValue = "";
+             }
+            cssPropObj[cssProps[prop]] = styleValue;
+         });
+         return cssPropObj;
+
+     }
+     function formatTextInQuill(html){
+         let qdataobj = [];
+         $(html).each( (index, element) => {
+             let elementText = $(element).html();
+             elementText = elementText.replaceAll("&nbsp;"," ");
+             if(elementText == '&nbsp;'){
+                 elementText = " ";
+             }
+             qdataobj.push({insert : elementText, attributes: getElementStyleInQuillObj($(element)) });
+         });
+         return qdataobj;
+         // var data = htmlObj.children('span').map(function() {
+         //   return {runId: $(this).text(), processName: $(this).next().text()};
+         // }).get();
+
+         /*$.each(cssProps, function (prop){
+
+         })*/
+
+
+     }
     $(document).on('click','#holder .text-block ',function(e){
+        quillCancel();
         let editingText = 'editing-here';// new Date().getTime()
         if($(this).hasClass('quilled')){
             let htmlcontent = $(this).html();
             quill.container.firstChild.innerHTML = htmlcontent;
             // quill.setText();
         }else{
-            quill.setText(stripHtml($(this).html()));
+            console.clear();
+            console.log('editing this bc..');
+            quill.setContents(formatTextInQuill($(this).html()));
+            // quill.setText(stripHtml($(this).html()));
+            // quill.clipboard.dangerouslyPasteHTML($(this).html(),'api')
+            // quill.setText();
         }
         $(this).addClass(editingText);
         $('#tool-holder #quill-holder #quillapply').attr('to-apply', editingText)
+        quill.focus();
     })
     $(document).on('click', '#tool-holder #quill-holder #quillapply', function (e){
         let toApply = $(this).attr('to-apply');
@@ -260,9 +331,9 @@ let initInteract = ()=>{
     //     }
     //   });
     // $('#holder *:not(img)').draggable().resizable({
-    // $('.draggable').draggable().resizable({
-    //     handles:"all",
-    //  });
+    $('.draggable').draggable().resizable({
+        handles:"all",
+     });
     
     // $('.draggable').each(function(id,event){
     //     putCordinates($(event));

@@ -203,7 +203,7 @@
                         break;
                     case "globalCSS":
                         //console.log(rslt_ary[i]["data"])
-                        $result.append("<style>" + rslt_ary[i]["data"] + "</style>");
+                        // $result.append("<style>" + rslt_ary[i]["data"] + "</style>");
                         break;
                     case "ExecutionTime":
                         processMsgQueue(MsgQueue);
@@ -211,8 +211,7 @@
                         setNumericBullets($("table td"));
 
                         isDone = true;
-                        console.log(htmlSlides);
-                        options.isProcessDone(htmlSlides);
+                        options.plotSlidedsIfDone(htmlSlides);
 
 
                         if (settings.slideMode && !isSlideMode) {

@@ -248,3 +248,12 @@ a.addNewSlide {
 .ql-container {
 	height: auto !important;
 }
+
+.ql-snow .ql-picker.ql-size .ql-picker-label::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item::before {
+	 content: attr(data-value) !important;
+}
+.ql-snow .ql-picker.ql-size .ql-picker-options{
+    height: 200px;
+    overflow: auto;
+}
