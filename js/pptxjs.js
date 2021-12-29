@@ -8640,7 +8640,8 @@
                 var prg_width_node = getTextByPathList(spNode, ["p:spPr", "a:xfrm", "a:ext", "attrs", "cx"]);
                 var prg_height_node;// = getTextByPathList(spNode, ["p:spPr", "a:xfrm", "a:ext", "attrs", "cy"]);
                 var sld_prg_width = ((prg_width_node !== undefined) ? ("width:" + (parseInt(prg_width_node) * slideFactor) + "px;") : "width:inherit;");
-                var sld_prg_height = ((prg_height_node !== undefined) ? ("height:" + (parseInt(prg_height_node) * slideFactor) + "px;") : "");
+                var sld_prg_width_row =(parseInt(prg_width_node) * slideFactor);
+                var sld_prg_height = ((prg_height_node !== undefined) ? ("height:" + (parseInt(prg_height_node) * slideFactor) + "px;") : "height:100%");
                 var prg_dir = getPregraphDir(pNode, textBodyNode, idx, type, warpObj);
                 text += "<div style='display: flex;" + sld_prg_width + sld_prg_height + "' class='slide-prgrph " + getHorizontalAlign(pNode, textBodyNode, idx, type, prg_dir, warpObj) + " " +
                     prg_dir + " " + cssName + "' >";
@@ -8673,8 +8674,26 @@
                     prgrph_text += prgr_text;
                 } else if (rNode !== undefined) {
                     // with multi r
+                    let last_width = 0;
+                    let line_height = 1;
                     for (var j = 0; j < rNode.length; j++) {
                         var prgr_text = genSpanElement(rNode[j], j, pNode, textBodyNode, pFontStyle, slideLayoutSpNode, idx, type, rNode.length, warpObj, isBullate);
+                        var txt_obj_forwidth = $(prgr_text)
+                                .css({ 'position': 'absolute', 'float': 'left', 'white-space': 'nowrap', 'visibility': 'hidden'})
+                                .appendTo($('body'));
+                        let updated_prgr_text =  $(prgr_text);
+                        updated_prgr_text.css('left',last_width);
+                        updated_prgr_text.css('line-height',line_height);
+                        updated_prgr_text.css('position','');
+                        updated_prgr_text.css('position','absolute');
+                        prgr_text = updated_prgr_text[0].outerHTML;
+                        last_width += txt_obj_forwidth.outerWidth();
+                        // console.log($(prgr_text).text(),last_width,sld_prg_width_row);
+                        if(last_width > sld_prg_width_row - 40){
+                            last_width = 0;
+                            line_height = line_height + 2;
+                        }
+                        txt_obj_forwidth.remove();
                         if (isBullate) {
                             var txt_obj = $(prgr_text)
                                 .css({ 'position': 'absolute', 'float': 'left', 'white-space': 'nowrap', 'visibility': 'hidden'})

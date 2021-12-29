@@ -412,14 +412,26 @@ let getPosition = (element)=>{
             height = $(closestblock[0]).css('height');
         }
     }
-
-    if(x == "0px" || y == "0px"){
-        let closestblock = element.closest('.block.content');
+    let closestblock = element.closest('.block.content');
+    if(x == "0px" && y == "0px"){
         if(closestblock.length > 0){
             x = $(closestblock[0]).css('left');
             y = $(closestblock[0]).css('top');
         }
     }
+    else if(x == "0px"){
+        if(closestblock.length > 0){
+            x = $(closestblock[0]).css('left');
+            y = parseInt(""+y.replace('px')) + parseInt($(closestblock[0]).css('top').replace('px'))+"";
+        }
+    }
+    else if(y == "0px"){
+        if(closestblock.length > 0){
+            x = parseInt(""+x.replace('px')) + parseInt($(closestblock[0]).css('left').replace('px'))+"";
+            y = $(closestblock[0]).css('top');
+        }
+    }
+
 
     return {
         x: x.replace('px',''),//(element.css('left') || "0px").replace('px',''),
@@ -433,7 +445,6 @@ let getJSONConfigByTag = (element)=>{
     if(element[0].nodeName == "#text"){ return false; }
     let style = getParsedStyle(element); 
     let position = getPosition(element);
-
     let parsedPosition = getParsedPosition(position);
 
     // return true
@@ -463,7 +474,7 @@ let getJSONConfigByTag = (element)=>{
         // rectRadius = 0;
     }
     switch(element.tagName()){
-        case 'sapn':
+        case 'span':
             return {
                 "RECTANGLE": {
                     shape: pptx.shapes.RECTANGLE ,
@@ -476,11 +487,10 @@ let getJSONConfigByTag = (element)=>{
                     align: textAlign,
                     fontSize: 14,
                     rectRadius:rectRadius,
-                    text:element.html(),                    
+                    text:element.html().replaceAll('&nbsp;',' '),                    
                 }
         };
         case 'div':
-            console.log('div enc');
             return {
                 "RECTANGLE": {
                     shape: (rectRadius > 0)? pptx.shapes.ROUNDED_RECTANGLE : pptx.shapes.RECTANGLE ,
