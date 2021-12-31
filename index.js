@@ -441,6 +441,9 @@ let getPosition = (element)=>{
     };
     // return element.get(0).getBoundingClientRect();    
 };
+let getSingleStyleByName = (styleName,style)=>{
+    return style.filter((s)=>{ return s[0] == styleName; });
+};
 let getJSONConfigByTag = (element)=>{
     if(element[0].nodeName == "#text"){ return false; }
     let style = getParsedStyle(element); 
@@ -453,11 +456,14 @@ let getJSONConfigByTag = (element)=>{
     let textColorStyle = style.filter((s)=>{ return s[0] == "color"; });    
     let textAlignStyle = style.filter((s)=>{ return s[0] == "text-align"; });
     let roundedStyle = style.filter((s)=>{ return s[0] == "border-radius"; });
-    
+    let fontSizeStyle = getSingleStyleByName('font-size',style);
+    let fontFaceStyle = getSingleStyleByName('font-family',style);
+
     let color = "ffffff"; //default color
     let textAlign = "left";
     let rectRadius = 0;
     let textColor = "000000";
+    let fontSize = 14;
     if(colorStyle.length > 0){
         color = colorStyle[0][1].trim().replace('#','');
         if(isRGB(color)){ color = rgbToHex(color).replace('#',''); }
@@ -473,8 +479,16 @@ let getJSONConfigByTag = (element)=>{
         rectRadius = Math.round((parseInt(roundedStyle[0][1].replace('px','').replace('%','')) * 100) / 180,1) / 20;
         // rectRadius = 0;
     }
+
+    if(fontSizeStyle.length > 0){
+        fontSize = fontSizeStyle[0][1].trim().replace('px','');
+    }
+    if(fontFaceStyle.length > 0){
+        fontFace = fontFaceStyle[0][1].trim();
+    }
+    fontSize = (30 * fontSize / 75);
     switch(element.tagName()){
-        case 'span':
+        case 'span-no-use':
             return {
                 "RECTANGLE": {
                     shape: pptx.shapes.RECTANGLE ,
@@ -485,7 +499,7 @@ let getJSONConfigByTag = (element)=>{
                     // fill: { color:color },
                     color:textColor,
                     align: textAlign,
-                    fontSize: 14,
+                    fontSize: fontSize,
                     rectRadius:rectRadius,
                     text:element.html().replaceAll('&nbsp;',' '),                    
                 }
@@ -524,12 +538,86 @@ let getJSONConfigByTag = (element)=>{
             break;
     }
 };
+
+let getSpanJSONConfig = (element)=>{
+    if(element[0].nodeName == "#text"){ return false; }
+    let style = getParsedStyle(element); 
+    let position = getPosition(element);
+    let parsedPosition = getParsedPosition(position);
+
+    // return true
+
+    let colorStyle = style.filter((s)=>{ return s[0] == "background-color"; });
+    let textColorStyle = style.filter((s)=>{ return s[0] == "color"; });    
+    let textAlignStyle = style.filter((s)=>{ return s[0] == "text-align"; });
+    let roundedStyle = style.filter((s)=>{ return s[0] == "border-radius"; });
+    let fontSizeStyle = getSingleStyleByName('font-size',style);
+    let fontFaceStyle = getSingleStyleByName('font-family',style);
+
+    let color = "ffffff"; //default color
+    let textAlign = "left";
+    let rectRadius = 0;
+    let textColor = "000000";
+    let fontSize = 14;
+    if(colorStyle.length > 0){
+        color = colorStyle[0][1].trim().replace('#','');
+        if(isRGB(color)){ color = rgbToHex(color).replace('#',''); }
+    }
+    if(textColorStyle.length > 0){
+        textColor = textColorStyle[0][1].trim().replace('#','');
+        if(isRGB(textColor)){ textColor = rgbToHex(textColor).replace('#',''); }
+    }
+    if(textAlignStyle.length > 0){
+        textAlign = textAlignStyle[0][1];
+    }
+    if(roundedStyle.length > 0){
+        rectRadius = Math.round((parseInt(roundedStyle[0][1].replace('px','').replace('%','')) * 100) / 180,1) / 20;
+        // rectRadius = 0;
+    }
+
+    if(fontSizeStyle.length > 0){
+        fontSize = fontSizeStyle[0][1].trim().replace('px','');
+    }
+    if(fontFaceStyle.length > 0){
+        fontFace = fontFaceStyle[0][1].trim();
+    }
+    fontSize = (30 * fontSize / 75);
+    return {
+        text : element.text(),
+        options : {
+            fontSize : fontSize,
+            color : textColor,
+            align : textAlign
+        }
+    };
+};
+
 let parseHtml = (holder,jsonConfig)=>{
     if(holder.children().length != 0){
         holder.each((id,singleElem)=>{
             let resp = getJSONConfigByTag($(singleElem));
             jsonConfig.push(resp);
         });        
+        if(holder.hasClass("text-block")){
+            let textBlockContent = [];
+            holder.find(' > span').each((id,span)=>{
+                textBlockContent.push(getSpanJSONConfig($(span)));
+            });
+            let position = getPosition(holder);
+            let parsedPosition = getParsedPosition(position);
+            console.log(parsedPosition);
+            jsonConfig.push({
+                "TEXT" :    {
+                    textBlockContent : textBlockContent,
+                    position : {
+                        x:parsedPosition.x+"%",
+                        y:parsedPosition.y+"%",
+                        w:parsedPosition.w+"%",
+                        h:parsedPosition.h+"%"
+                    }
+                }
+            });
+        }
         // let resp = getJSONConfigByTag($(holder));
         // jsonConfig.push(resp);
         return parseHtml(holder.children(),jsonConfig);
@@ -553,8 +641,6 @@ let generate = function() {
     $.each(htmlSlides,(id,htmlSlide)=>{
         let slide = pptx.addSlide(id); 
         let jsonConfig = parseHtml($(htmlSlide),[]);
-        console.log(jsonConfig);
-
         $.each(jsonConfig,(type,config)=>{
             let configId = Object.keys(config)[0];
             let configElement = config[Object.keys(config)[0]];
@@ -569,10 +655,13 @@ let generate = function() {
                     break;
                 case 'IMAGE':
                     slide.addImage(configElement);
-                    break;                    
+                    break; 
+                case 'TEXT' :
+                    slide.addText(configElement.textBlockContent,configElement.position);
             }            
         });
     });
+    console.log(pptx.slides);    
     pptx.writeFile({
         fileName: 'Demo_one.pptx'
     });
