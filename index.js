@@ -19,7 +19,44 @@ let elem3 = `<div class="draggable" style="width: 250px; height: 250px; backgrou
 let elem4 = `<div class="draggable" style="width: 250px; height: 250px; background-color: rgb(34, 153, 238); color: rgb(255, 255, 255); border-radius: 5%; padding: 4%; touch-action: none; user-select: none; left: 236px; top: 256px;" data-x="236" data-y="256">156 - -259</div>`;
 
 
-let plotSideSlides = (slides)=>{
+let styleObj = {};
+let prepStyleObj = function(style){
+
+
+    style = style.replaceAll('\n','');
+    style = style.replaceAll('<style>','');
+    style = style.replaceAll('</style>','');
+    style = style.replaceAll(' ','');
+    let classes = lsparse.extractBetString(style,'._','{');
+    let classstyle = lsparse.extractBetString(style,'{','}');
+
+    if(classes.length == classstyle.length){
+        // console.log(style);
+        // console.log(classes);
+        // console.log(classstyle);
+        for(let [index, classe] of classes.entries()) {
+            styleObj['_'+classe] = classstyle[index];
+        }
+        console.log(styleObj);
+    }else{
+        styleObj = [];
+        console.log('nai chale bhai..');
+    }
+}
+
+function applyStyleObj(){
+    let extclasses = Object.keys(styleObj);
+    console.log(extclasses);
+    for(extclass of extclasses){
+
+        $(extclasses).css();
+    }
+}
+
+
+let plotSideSlides = (slides, style)=>{
+
+    $('head').append(style);
     $('.slidesHolder').html('');
     $.each(slides,(id,slide)=>{
             let html = '';
@@ -29,7 +66,8 @@ let plotSideSlides = (slides)=>{
             $('.slidesHolder').append(html);
     });
     $('.singleSlidePreview:first-child').click();
-
+    // prepStyleObj(style);
+    // applyStyleObj();
 };
 let currentSlide = false;
 let plotSlide = (slideHtml)=>{

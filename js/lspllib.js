@@ -242,6 +242,21 @@ lsparse = (function($) {
                 }
             };
         },
+        applyCssToInline : () => {
+            s = getComputedStyle(el);
+        },
+
+        extractBetString : function(str, begin, ending){
+            let extract  = function([beg, end]) {
+                const matcher = new RegExp(`${beg}(.*?)${end}`, 'gm');
+                const normalise = (str) => str.slice(beg.length, end.length * -1);
+                return function (str) {
+                    return str.match(matcher).map(normalise);
+                }
+            }
+            let fineclasses = extract([begin,ending]);
+            return fineclasses(str);
+        },
 
 
         /**

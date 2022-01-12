@@ -180,12 +180,14 @@
             //if (typeof file === 'string') { // Load
             zip = zip.load(file);  //zip.load(file, { base64: true });
             var rslt_ary = processPPTX(zip);
+            var htmlSlidesCSS = "<style></style>";
             //s = readXmlFile(zip, 'ppt/tableStyles.xml');
             //var slidesHeight = $("#" + divId + " .slide").height();
             for (var i = 0; i < rslt_ary.length; i++) {
                 switch (rslt_ary[i]["type"]) {
                     case "slide":
                         // $result.append(rslt_ary[i]["data"]);
+                        console.log('slide done..'+i);
                         htmlSlides.push(rslt_ary[i]["data"]);
                         break;
                     case "pptx-thumb":
@@ -203,6 +205,10 @@
                         break;
                     case "globalCSS":
                         //console.log(rslt_ary[i]["data"])
+                        console.log('--------style-------start');
+                        htmlSlidesCSS = "<style>" + rslt_ary[i]["data"] + "</style>";
+                        console.log('--------style-------ends-');
+
                         // $result.append("<style>" + rslt_ary[i]["data"] + "</style>");
                         break;
                     case "ExecutionTime":
@@ -211,7 +217,8 @@
                         setNumericBullets($("table td"));
 
                         isDone = true;
-                        options.plotSlidedsIfDone(htmlSlides);
+                        console.log('returning html--');
+                        options.plotSlidedsIfDone(htmlSlides, htmlSlidesCSS);
 
 
                         if (settings.slideMode && !isSlideMode) {
