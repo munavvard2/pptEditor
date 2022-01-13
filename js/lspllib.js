@@ -1,10 +1,30 @@
 //https://www.atlanticbt.com/insights/create-your-own-javascript-library/
 //https://www.sitepoint.com/design-and-build-your-own-javascript-library/
 
+
+(function($) {
+    $.extend($.fn, {
+        makeCssInline: function() {
+            this.each(function(idx, el) {
+                var style = el.style;
+                var properties = [];
+                for(var property in style) {
+                    if($(this).css(property)) {
+                        properties.push(property + ':' + $(this).css(property));
+                    }
+                }
+                this.style.cssText = properties.join(';');
+                $(this).children().makeCssInline();
+            });
+        }
+    });
+}(jQuery))
+
+
 if (typeof lsparse === "undefined")
 	var lsparse = {}
 
-lsparse = (function($) {
+ls = (function($) {
 
     var LIB = {
         test: () => console.log('Lib get loaded..'), //page directives or sublibraries

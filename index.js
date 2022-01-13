@@ -1,6 +1,9 @@
 jQuery.fn.tagName = function() {
     return this.prop("tagName").toLowerCase();
   };
+
+
+
 //let position = { x: 0, y: 0 };
 const config = { attributes: true, childList: true, subtree: true };
 const callback = function(mutationsList, observer) {
@@ -20,22 +23,35 @@ let elem4 = `<div class="draggable" style="width: 250px; height: 250px; backgrou
 
 
 let styleObj = {};
-let prepStyleObj = function(style){
+let prepStyleObjAndApply = function(style){
 
 
     style = style.replaceAll('\n','');
     style = style.replaceAll('<style>','');
     style = style.replaceAll('</style>','');
     style = style.replaceAll(' ','');
-    let classes = lsparse.extractBetString(style,'._','{');
-    let classstyle = lsparse.extractBetString(style,'{','}');
+    let classes = ls.extractBetString(style,'._','{');
+    let classstyle = ls.extractBetString(style,'{','}');
 
     if(classes.length == classstyle.length){
         // console.log(style);
         // console.log(classes);
         // console.log(classstyle);
         for(let [index, classe] of classes.entries()) {
-            styleObj['_'+classe] = classstyle[index];
+            let className = '._'+classe;
+
+            let eachStyleObj = {};
+            jQuery.map(classstyle[index].split(';'), function(st, i){
+                if(st != ""){
+                    let jstyle = st.split(":");
+                    eachStyleObj[jstyle[0]] = jstyle[1];
+                }
+            });
+            styleObj[className] = eachStyleObj;
+            $(className).css(eachStyleObj);
+
+            // $(className).
+
         }
         console.log(styleObj);
     }else{
@@ -44,19 +60,10 @@ let prepStyleObj = function(style){
     }
 }
 
-function applyStyleObj(){
-    let extclasses = Object.keys(styleObj);
-    console.log(extclasses);
-    for(extclass of extclasses){
-
-        $(extclasses).css();
-    }
-}
-
 
 let plotSideSlides = (slides, style)=>{
 
-    $('head').append(style);
+    // $('head').append(style);
     $('.slidesHolder').html('');
     $.each(slides,(id,slide)=>{
             let html = '';
@@ -66,8 +73,9 @@ let plotSideSlides = (slides, style)=>{
             $('.slidesHolder').append(html);
     });
     $('.singleSlidePreview:first-child').click();
-    // prepStyleObj(style);
-    // applyStyleObj();
+    prepStyleObjAndApply(style)
+    // $('body').makeCssInline()
+    // $('style').remove()
 };
 let currentSlide = false;
 let plotSlide = (slideHtml)=>{
@@ -474,7 +482,7 @@ let generate = function() {
     pptx = new PptxGenJS();
     $.each(htmlSlides,(id,htmlSlide)=>{
         let slide = pptx.addSlide(id); 
-        let jsonConfig = lsparse.parseHtml($(htmlSlide),[]);
+        let jsonConfig = ls.parseHtml($(htmlSlide),[]);
         console.clear();
         console.log(jsonConfig);
 
