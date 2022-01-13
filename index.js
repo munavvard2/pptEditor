@@ -223,29 +223,45 @@ jQuery(document).ready(function($){
     var Size = Quill.import('attributors/style/size');
     Size.whitelist = fontSizeArr;
     Quill.register(Size, true);
-    var ColorClass = Quill.import('attributors/class/color');
-    var SizeStyle = Quill.import('attributors/style/size');
+    // var ColorClass = Quill.import('attributors/class/color');
+    // var SizeStyle = Quill.import('attributors/style/size');
 
-    Quill.register(ColorClass, true);
-    Quill.register(SizeStyle, true);
+    // Quill.register(ColorClass, true);
+    // Quill.register(SizeStyle, true);
 
-    const toolbarOptions = [
-    [{ 'size': fontSizeArr }],
-    ['bold', 'italic', 'underline', 'strike'],
-    // ['blockquote', 'code-block'],
-    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-    [{'list': 'ordered'}, {'list': 'bullet'}],
-    [{'script': 'sub'}, {'script': 'super'}],
-    [{'indent': '-1'}, {'indent': '+1'}],
-    [{'direction': 'rtl'}],
-    // ['link', 'image', 'video', 'formula'],
-    [{'color': []}, {'background': []}],
-    // [{'font': []}],
-    [{'align': []}],
-    ['clean'],
+    var toolbarOptions = [
+        ['bold', 'italic'],
+        ['link', 'image','formula'],
+        [{ 'size': fontSizeArr }],
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        [{ 'color': [] }, { 'background': [] }],
+        // [{ 'font': [] }],
+        [{ 'align': [] }],
+        ['clean'],
     ];
+    // const toolbarOptions = [
+    // [{ 'size': fontSizeArr }],
+    // ['bold', 'italic', 'underline', 'strike'],
+    // // ['blockquote', 'code-block'],
+    // [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+    // // [{'list': 'ordered'}, {'list': 'bullet'}],
+    // // [{'script': 'sub'}, {'script': 'super'}],
+    // // [{'indent': '-1'}, {'indent': '+1'}],
+    // // [{'direction': 'rtl'}],
+    // // ['link', 'image', 'video', 'formula'],
+    // [{'color': []}, {'background': []}],
+    // // [{'font': []}],
+    // [{'align': []}],
+    // ['clean'],
+    // ];
+
 
      window.quill = new Quill('#tool-holder #quill-editor', {
+      handlers: {
+          'color': function(value) {
+              alert('fasdf');
+          }
+      },
       modules: {
         toolbar: toolbarOptions
       },
