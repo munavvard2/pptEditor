@@ -34,9 +34,7 @@ let prepStyleObjAndApply = function(style){
     let classstyle = ls.extractBetString(style,'{','}');
 
     if(classes.length == classstyle.length){
-        // console.log(style);
-        // console.log(classes);
-        // console.log(classstyle);
+
         for(let [index, classe] of classes.entries()) {
             let className = '._'+classe;
 
@@ -53,7 +51,6 @@ let prepStyleObjAndApply = function(style){
             // $(className).
 
         }
-        console.log(styleObj);
     }else{
         styleObj = [];
         console.log('nai chale bhai..');
@@ -288,6 +285,8 @@ jQuery(document).ready(function($){
              let styleValue = htmlObj.css(prop);
              if(styleValue == "bold"){
                 styleValue = true;
+             }else if(prop == "color"){
+                styleValue = '#'+ls.rgbToHex(styleValue)
              }else if(styleValue == "inherit"){
                  styleValue = "";
              }else if(styleValue == undefined || styleValue == ""){
@@ -406,75 +405,6 @@ let putCordinates = (elem)=>{
 };
 
 let pptx = new PptxGenJS(); 
-let isRGB = (color)=>{
-    return color.includes('rgb');
-};
-let rgbToHex = (color) => {
-    color = color.replace('rgb(','').replace(')','').split(',');
-    let r = color[0].trim();let g = color[1].trim();let b=color[2].trim();
-    return [r, g, b].map(x => {
-        x = parseInt(x);
-        const hex = x.toString(16)
-        return hex.length === 1 ? '0' + hex : hex
-      }).join('');
-};
-let getParsedStyle = (element)=>{
-    if(element.attr('style') != undefined){
-        return element.attr('style').split(';').map((s)=>{ return s.trim().split(':'); });
-    }
-    return [];
-};
-;
-let getPositionjQ = (element)=>{
-
-    let ppoo =  element.position();
-    return { x:ppoo.top,y:ppoo.left };
-};
-let getPosition = (element)=>{
-    let width = element.css('width');
-    let height = element.css('height');
-    let x = (element.css('left') || "0px");
-    let y = (element.css('top') || "0px");
-
-    if(height == "100%" || width == "100%" || height == "0px" || width == "0px"){
-        let closestblock = element.closest('.block.content');
-        if(closestblock.length > 0){
-            width = $(closestblock[0]).css('width');
-            height = $(closestblock[0]).css('height');
-        }
-    }
-    let closestblock = element.closest('.block.content');
-    if(x == "0px" && y == "0px"){
-        if(closestblock.length > 0){
-            x = $(closestblock[0]).css('left');
-            y = $(closestblock[0]).css('top');
-        }
-    }
-    else if(x == "0px"){
-        if(closestblock.length > 0){
-            x = $(closestblock[0]).css('left');
-            y = parseInt(""+y.replace('px')) + parseInt($(closestblock[0]).css('top').replace('px'))+"";
-        }
-    }
-    else if(y == "0px"){
-        if(closestblock.length > 0){
-            x = parseInt(""+x.replace('px')) + parseInt($(closestblock[0]).css('left').replace('px'))+"";
-            y = $(closestblock[0]).css('top');
-        }
-    }
-
-
-    return {
-        x: x.replace('px',''),//(element.css('left') || "0px").replace('px',''),
-        y: y.replace('px',''),//(element.css('top') || "0px").replace('px',''),
-        width:width,
-        height:height
-    };
-    // return element.get(0).getBoundingClientRect();    
-};
-let getSingleStyleByName = (styleName,style)=>{
-    return style.filter((s)=>{ return s[0] == styleName; });
-};
 
 // https://gitbrent.github.io/PptxGenJS/demo/browser/index.html
 let generate = function() {
@@ -483,7 +413,6 @@ let generate = function() {
     $.each(htmlSlides,(id,htmlSlide)=>{
         let slide = pptx.addSlide(id); 
         let jsonConfig = ls.parseHtml($(htmlSlide),[]);
-        console.clear();
         console.log(jsonConfig);
 
         $.each(jsonConfig,(type,config)=>{

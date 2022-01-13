@@ -29,6 +29,81 @@ ls = (function($) {
     var LIB = {
         test: () => console.log('Lib get loaded..'), //page directives or sublibraries
 
+
+        isRGB : (color)=>{
+            return color.includes('rgb');
+        },
+        rgbToHex : (color) => {
+            color = color.replace('rgb(','').replace(')','').split(',');
+            let r = color[0].trim();let g = color[1].trim();let b=color[2].trim();
+            return [r, g, b].map(x => {
+                x = parseInt(x);
+                const hex = x.toString(16)
+                return hex.length === 1 ? '0' + hex : hex
+              }).join('');
+        },
+        getParsedStyle : (element)=>{
+            if(element.attr('style') != undefined){
+                return element.attr('style').split(';').map((s)=>{ return s.trim().split(':'); });
+            }
+            return [];
+        },
+
+        getPositionjQ : (element)=>{
+
+            let ppoo =  element.position();
+            return { x:ppoo.top,y:ppoo.left };
+        },
+        getPosition : (element)=>{
+            let width = element.css('width');
+            let height = element.css('height');
+            let x = (element.css('left') || "0px");
+            let y = (element.css('top') || "0px");
+
+            if(height == "100%" || width == "100%" || height == "0px" || width == "0px"){
+                let closestblock = element.closest('.block.content');
+                if(closestblock.length > 0){
+                    width = $(closestblock[0]).css('width');
+                    height = $(closestblock[0]).css('height');
+                }
+            }
+            let closestblock = element.closest('.block.content');
+            if(x == "0px" && y == "0px"){
+                if(closestblock.length > 0){
+                    x = $(closestblock[0]).css('left');
+                    y = $(closestblock[0]).css('top');
+                }
+            }
+            else if(x == "0px"){
+                if(closestblock.length > 0){
+                    x = $(closestblock[0]).css('left');
+                    y = parseInt(""+y.replace('px')) + parseInt($(closestblock[0]).css('top').replace('px'))+"";
+                }
+            }
+            else if(y == "0px"){
+                if(closestblock.length > 0){
+                    x = parseInt(""+x.replace('px')) + parseInt($(closestblock[0]).css('left').replace('px'))+"";
+                    y = $(closestblock[0]).css('top');
+                }
+            }
+
+
+            return {
+                x: x.replace('px',''),//(element.css('left') || "0px").replace('px',''),
+                y: y.replace('px',''),//(element.css('top') || "0px").replace('px',''),
+                width:width,
+                height:height
+            };
+            // return element.get(0).getBoundingClientRect();
+        },
+        getSingleStyleByName : (styleName,style)=>{
+            return style.filter((s)=>{ return s[0] == styleName; });
+        },
+
+
+
+
+
         getParsedPosition : (position)=> {
             let x = (position.x * 100) / 1280;
             let y = (position.y * 100) / 720;
@@ -50,8 +125,8 @@ ls = (function($) {
             if (element[0].nodeName == "#text") {
                 return false;
             }
-            let style = getParsedStyle(element);
-            let position = getPosition(element);
+            let style = LIB.getParsedStyle(element);
+            let position = LIB.getPosition(element);
             let parsedPosition = LIB.getParsedPosition(position);
 
             // return true
@@ -68,8 +143,8 @@ ls = (function($) {
             let roundedStyle = style.filter((s) => {
                 return s[0] == "border-radius";
             });
-            let fontSizeStyle = getSingleStyleByName('font-size', style);
-            let fontFaceStyle = getSingleStyleByName('font-family', style);
+            let fontSizeStyle = LIB.getSingleStyleByName('font-size', style);
+            let fontFaceStyle = LIB.getSingleStyleByName('font-family', style);
 
             let color = "ffffff"; //default color
             let textAlign = "left";
@@ -78,14 +153,14 @@ ls = (function($) {
             let fontSize = 14;
             if (colorStyle.length > 0) {
                 color = colorStyle[0][1].trim().replace('#', '');
-                if (isRGB(color)) {
-                    color = rgbToHex(color).replace('#', '');
+                if (LIB.isRGB(color)) {
+                    color = LIB.rgbToHex(color).replace('#', '');
                 }
             }
             if (textColorStyle.length > 0) {
                 textColor = textColorStyle[0][1].trim().replace('#', '');
-                if (isRGB(textColor)) {
-                    textColor = rgbToHex(textColor).replace('#', '');
+                if (LIB.isRGB(textColor)) {
+                    textColor = LIB.rgbToHex(textColor).replace('#', '');
                 }
             }
             if (textAlignStyle.length > 0) {
@@ -165,7 +240,7 @@ ls = (function($) {
                     holder.find(' > span').each((id, span) => {
                         textBlockContent.push(LIB.getSpanJSONConfig($(span)));
                     });
-                    let position = getPosition(holder);
+                    let position = LIB.getPosition(holder);
                     let parsedPosition = LIB.getParsedPosition(position);
                     jsonConfig.push({
                         "TEXT": {
@@ -183,8 +258,8 @@ ls = (function($) {
                 // jsonConfig.push(resp);
                 return LIB.parseHtml(holder.children(), jsonConfig);
             } else {
-                console.log('parseHtml in else,,')
                 holder.each((id, singleElem) => {
+                    console.log(singleElem);
                     let resp = LIB.getJSONConfigByTag($(singleElem));
                     jsonConfig.push(resp);
                 });
@@ -200,8 +275,8 @@ ls = (function($) {
             if (element[0].nodeName == "#text") {
                 return false;
             }
-            let style = getParsedStyle(element);
-            let position = getPosition(element);
+            let style = LIB.getParsedStyle(element);
+            let position = LIB.getPosition(element);
             let parsedPosition = LIB.getParsedPosition(position);
 
             // return true
@@ -218,8 +293,8 @@ ls = (function($) {
             let roundedStyle = style.filter((s) => {
                 return s[0] == "border-radius";
             });
-            let fontSizeStyle = getSingleStyleByName('font-size', style);
-            let fontFaceStyle = getSingleStyleByName('font-family', style);
+            let fontSizeStyle = LIB.getSingleStyleByName('font-size', style);
+            let fontFaceStyle = LIB.getSingleStyleByName('font-family', style);
 
             let color = "ffffff"; //default color
             let textAlign = "left";
@@ -228,14 +303,14 @@ ls = (function($) {
             let fontSize = 14;
             if (colorStyle.length > 0) {
                 color = colorStyle[0][1].trim().replace('#', '');
-                if (isRGB(color)) {
-                    color = rgbToHex(color).replace('#', '');
+                if (LIB.isRGB(color)) {
+                    color = LIB.rgbToHex(color).replace('#', '');
                 }
             }
             if (textColorStyle.length > 0) {
                 textColor = textColorStyle[0][1].trim().replace('#', '');
-                if (isRGB(textColor)) {
-                    textColor = rgbToHex(textColor).replace('#', '');
+                if (LIB.isRGB(textColor)) {
+                    textColor = LIB.rgbToHex(textColor).replace('#', '');
                 }
             }
             if (textAlignStyle.length > 0) {
