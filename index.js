@@ -22,7 +22,7 @@ let elem3 = `<div class="draggable" style="width: 250px; height: 250px; backgrou
 let elem4 = `<div class="draggable" style="width: 250px; height: 250px; background-color: rgb(34, 153, 238); color: rgb(255, 255, 255); border-radius: 5%; padding: 4%; touch-action: none; user-select: none; left: 236px; top: 256px;" data-x="236" data-y="256">156 - -259</div>`;
 
 
-let styleObj = {};
+window.styleObj = {};
 let prepStyleObjAndApply = function(style){
 
 
@@ -55,7 +55,17 @@ let prepStyleObjAndApply = function(style){
         styleObj = [];
         console.log('nai chale bhai..');
     }
+    updatehtmlSlides();
 }
+
+let updatehtmlSlides = function(){
+    console.log('preparing array again..!!');
+    htmlSlides = [];
+    $(document).find('.singleSlidePreview').each(function(slide){
+        htmlSlides.push($(this).find('.slideContent').html())
+    })
+}
+
 
 
 let plotSideSlides = (slides, style)=>{
@@ -69,12 +79,12 @@ let plotSideSlides = (slides, style)=>{
             html += '</div></div>';
             $('.slidesHolder').append(html);
     });
-    $('.singleSlidePreview:first-child').click();
+    // $('.singleSlidePreview:first-child').click();
     prepStyleObjAndApply(style)
     // $('body').makeCssInline()
     // $('style').remove()
 };
-let currentSlide = false;
+window.currentSlide = false;
 let plotSlide = (slideHtml)=>{
     observer.disconnect();
     $('#holder').html(slideHtml);
@@ -137,6 +147,7 @@ function stripHtml(html)
             // pptxFileUrl: "Nishit.pptx",
             // pptxFileUrl: "Sample_12.pptx",
             pptxFileUrl: "BeYu Pitch Deck_small.pptx",
+            // pptxFileUrl: "BeYu Pitch Deck.pptx",
 
             fileInputId: "uploadFileInput",
             slideMode: false,
@@ -236,8 +247,7 @@ jQuery(document).ready(function($){
         [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
         [{ 'color': [] }, { 'background': [] }],
         // [{ 'font': [] }],
-        [{ 'align': [] }],
-        ['clean'],
+        [{ 'align': [] }]
     ];
     // const toolbarOptions = [
     // [{ 'size': fontSizeArr }],
@@ -301,9 +311,11 @@ jQuery(document).ready(function($){
              let styleValue = htmlObj.css(prop);
              if(styleValue == "bold"){
                 styleValue = true;
-             }else if(prop == "color"){
-                styleValue = '#'+ls.rgbToHex(styleValue)
-             }else if(styleValue == "inherit"){
+             }
+             // else if(prop == "color"){
+             //    styleValue = '#'+ls.rgbToHex(styleValue)
+             // }
+             else if(styleValue == "inherit"){
                  styleValue = "";
              }else if(styleValue == undefined || styleValue == ""){
                  styleValue = "";
