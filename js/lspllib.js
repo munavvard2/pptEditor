@@ -180,6 +180,7 @@ ls = (function($) {
             fontSize = (30 * fontSize / 75);
             switch (element.tagName()) {
                 case 'span-no-use':
+                            ls.tools.log(element);
                     return {
                         "RECTANGLE": {
                             shape: pptx.shapes.RECTANGLE,
@@ -237,9 +238,15 @@ ls = (function($) {
                 });
                 if (holder.hasClass("text-block")) {
                     let textBlockContent = [];
-                    holder.find(' > span').each((id, span) => {
-                        textBlockContent.push(LIB.getSpanJSONConfig($(span)));
-                    });
+                    if(holder.hasClass('quilled')){
+                        holder.find(' > p').children().each((id, para) => {
+                            textBlockContent.push(LIB.getSpanJSONConfig($(para)));
+                        });
+                    }else{
+                        holder.find(' > span').each((id, span) => {
+                            textBlockContent.push(LIB.getSpanJSONConfig($(span)));
+                        });
+                    }
                     let position = LIB.getPosition(holder);
                     let parsedPosition = LIB.getParsedPosition(position);
                     jsonConfig.push({
@@ -259,7 +266,6 @@ ls = (function($) {
                 return LIB.parseHtml(holder.children(), jsonConfig);
             } else {
                 holder.each((id, singleElem) => {
-                    console.log(singleElem);
                     let resp = LIB.getJSONConfigByTag($(singleElem));
                     jsonConfig.push(resp);
                 });

@@ -87,7 +87,15 @@ let plotSideSlides = (slides, style)=>{
 window.currentSlide = false;
 let plotSlide = (slideHtml)=>{
     observer.disconnect();
+    // let actualsize = $('#holder').width()
+    // let slidewidth = parseFloat($(slideHtml).css('width').replace('px',''));
+    // let scale = 'scale('+actualsize / slidewidth+')';
+
+    // ls.tools.log(actualsize, slidewidth,scale);
+    // console.log(slideHtml);
+    // $('#holder').html(slideHtml).css({'transform': scale});
     $('#holder').html(slideHtml);
+
     observer.observe($('#holder').get(0), config);
     initInteract();
 };
