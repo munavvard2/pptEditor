@@ -358,6 +358,39 @@ ls = (function($) {
             let fineclasses = extract([begin,ending]);
             return fineclasses(str);
         },
+        // http://jsfiddle.net/no9cq5xk/    https://stackoverflow.com/questions/31246837/jquery-ui-resizable-resize-all-child-elements-and-its-font-size
+        applyresizing : function (parentElement) {
+            $(parentElement).each(function () {
+                $(this).data("height", $(this).outerHeight());
+                $(this).data("width", $(this).outerWidth());
+            });
+
+            // Storing initial children CSS
+            $(parentElement + ' *').each(function () {
+                $(this).data("height", $(this).outerHeight());
+                $(this).data("width", $(this).outerWidth());
+                $(this).data("fontSize", parseInt($(this).css("font-size")));
+            });
+
+            $(parentElement).resizable({
+                resize: function (e, ui) {
+                    var wr = $(this).outerWidth() / $(this).data("width");
+                    var hr = $(this).outerHeight() / $(this).data("height");
+
+                    $(this).find("*").each(function (i, elm) {
+                        var w = $(elm).data("width") * wr;
+                        var h = $(elm).data("height") * hr;
+                        // Adjusting font size according to smallest ratio
+                        var f = $(elm).data("fontSize") * ((hr > wr) ? wr : hr);
+                        $(elm).css({
+                            "width": w,
+                            "height": h,
+                            "font-size": f
+                        });
+                    });
+                },
+            });
+        },
 
 
         /**
