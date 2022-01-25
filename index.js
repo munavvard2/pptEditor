@@ -84,20 +84,85 @@ let plotSideSlides = (slides, style)=>{
     // $('body').makeCssInline()
     // $('style').remove()
 };
+
+// http://jsfiddle.net/no9cq5xk/    https://stackoverflow.com/questions/31246837/jquery-ui-resizable-resize-all-child-elements-and-its-font-size
+window.applyresizing = function(parentElement){
+
+    $(parentElement).each(function(){
+        console.log('applying on parent..');
+        $(this).data("height", $(this).outerHeight());
+        $(this).data("width", $(this).outerWidth());
+    });
+
+    // Storing initial children CSS
+    $(parentElement+' *').each(function(){
+        console.log('applying on child..');
+        $(this).data("height", $(this).outerHeight());
+        $(this).data("width", $(this).outerWidth());
+        $(this).data("fontSize", parseInt($(this).css("font-size")));
+    });
+
+    $(parentElement).resizable({
+        resize: function (e, ui) {
+            console.log('applying resizable..');
+            var wr = $(this).outerWidth()/$(this).data("width");
+            var hr = $(this).outerHeight()/$(this).data("height");
+
+            $(this).find("*").each(function (i, elm) {
+
+                var w = $(elm).data("width") * wr;
+                var h = $(elm).data("height") * hr;
+                // Adjusting font size according to smallest ratio
+                var f = $(elm).data("fontSize") * ((hr > wr) ? wr : hr);
+                $(elm).css({
+                    "width": w,
+                    "height": h,
+                    "font-size": f
+                });
+            });
+        },
+    });
+
+    // simulateClick(parentElement)
+}
+
+function simulateClick(id) {
+  var event = new MouseEvent('resize', {
+    'view': window,
+    'bubbles': true,
+    'cancelable': true
+  });
+
+  var elem = document.getElementById(id);
+
+  return elem.dispatchEvent(event);
+}
+
 window.currentSlide = false;
 let plotSlide = (slideHtml)=>{
     observer.disconnect();
+
+
     let actualsize = $('#holder').width()
     let slidewidth = parseFloat($(slideHtml).css('width').replace('px',''));
     let slideheight = parseFloat($(slideHtml).css('height').replace('px',''));
     // let scale = 'scale('+actualsize / slidewidth+')';
     let scale = actualsize / slidewidth;
 
-    // ls.tools.log(actualsize, slidewidth, slidewidth*scale+'px',scale);
+    ls.tools.log(slidewidth*scale+'px', slideheight*scale+'px',scale);
     // console.log(slideHtml);
     $('#holder').html(slideHtml);
-    $('#holder, #holder > .slide').css({'width': slidewidth*scale+'px', 'height':slideheight*scale+'px'});
-    ls.applyresizing('#holder .slide');
+    applyresizing('#holder .slide')
+
+    $('#holder .slide, #holder .slide').css({'width': (slidewidth*scale) +'px', 'height':(slideheight*scale) +'px'});
+    $('#holder .slide .ui-resizable-handle:last').trigger('mousemove')
+    // applyresizing('#holder')
+    // applyresizing('#holder > .slide')
+
+    //,
+    // $('#holder > .slide').css({'width': slidewidth*scale +'px', 'height':slideheight*scale +'px'});
+    // applyresizing('#holder .slide')
+
 
     observer.observe($('#holder').get(0), config);
     initInteract();
@@ -387,7 +452,21 @@ jQuery(document).ready(function($){
         quillCancel();
      });
 
-
+     $(document).on('click','#holder .block.draggable', function (e){
+        $('.block.draggable').removeClass('pointing');
+        $(this).addClass('pointing');
+        // $(this).tooltip("open");
+    });
+    $(document).on("click", function(event){
+        if(!$(event.target).closest("#holder").length){
+            $('.block.draggable').removeClass('pointing');
+        }
+    });
+    $(document).keyup(function(e){
+        if(e.keyCode == 46) {
+           $('.block.draggable.pointing').remove();
+        }
+    });
 
     // generate();
 });

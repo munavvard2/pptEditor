@@ -261,3 +261,9 @@ a.addNewSlide {
     height: 200px;
     overflow: auto;
 }
+
+/*----------------*/
+#holder .pointing{
+	 cursor: pointer;
+	 border: 1px solid #d62728;
+}
