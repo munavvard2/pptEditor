@@ -86,17 +86,26 @@ let plotSideSlides = (slides, style)=>{
 };
 
 // http://jsfiddle.net/no9cq5xk/    https://stackoverflow.com/questions/31246837/jquery-ui-resizable-resize-all-child-elements-and-its-font-size
-window.applyresizing = function(parentElement){
+window.beforeresizing = function(parentElement){
 
+    console.clear();
+    console.log(parentElement);
     $(parentElement).each(function(){
-        console.log('applying on parent..');
+        console.log('setting parent heights');
         $(this).data("height", $(this).outerHeight());
         $(this).data("width", $(this).outerWidth());
+
     });
 
     // Storing initial children CSS
     $(parentElement+' *').each(function(){
-        console.log('applying on child..');
+
+        if($(this).hasClass('block')){
+            console.log($(this));
+                $(this).data('top',$(this).css('top'));
+                $(this).data('left',$(this).css('left'));
+            }
+        console.log('setting heights..');
         $(this).data("height", $(this).outerHeight());
         $(this).data("width", $(this).outerWidth());
         $(this).data("fontSize", parseInt($(this).css("font-size")));
@@ -104,27 +113,72 @@ window.applyresizing = function(parentElement){
 
     $(parentElement).resizable({
         resize: function (e, ui) {
-            console.log('applying resizable..');
-            var wr = $(this).outerWidth()/$(this).data("width");
-            var hr = $(this).outerHeight()/$(this).data("height");
+                var wr = $(parentElement).outerWidth()/$(parentElement).data("width");
+                var hr = $(parentElement).outerHeight()/$(parentElement).data("height");
 
-            $(this).find("*").each(function (i, elm) {
+                $(parentElement).find("*").each(function (i, elm) {
 
-                var w = $(elm).data("width") * wr;
-                var h = $(elm).data("height") * hr;
+                let elmObj = $(elm);
+                var w = elmObj.data("width") * wr;
+                var h = elmObj.data("height") * hr;
                 // Adjusting font size according to smallest ratio
-                var f = $(elm).data("fontSize") * ((hr > wr) ? wr : hr);
-                $(elm).css({
-                    "width": w,
-                    "height": h,
-                    "font-size": f
-                });
+                var f = elmObj.data("fontSize") * ((hr > wr) ? wr : hr);
+                if(elmObj.tagName() == "img"){
+
+                    elmObj.css({
+                        "width": w+"!important",
+                        "height": h+"!important",
+                        // "font-size": f
+                    });
+                }else{
+                    elmObj.css({
+                        "width": w,
+                        "height": h,
+                        "font-size": f
+                    });
+                }
             });
         },
     });
-
     // simulateClick(parentElement)
 }
+
+window.applyresizing = function (parentElement){
+
+
+        var wr = $(parentElement).outerWidth()/$(parentElement).data("width");
+        var hr = $(parentElement).outerHeight()/$(parentElement).data("height");
+
+                $(parentElement).find("*").each(function (i, elm) {
+
+                let elmObj = $(elm);
+                var w = elmObj.data("width") * wr;
+                var h = elmObj.data("height") * hr;
+                // Adjusting font size according to smallest ratio
+                var f = elmObj.data("fontSize") * ((hr > wr) ? wr : hr);
+                if(elmObj.hasClass('block')){
+                    let top = parseFloat(elmObj.data('top').replace('px'))*wr;
+                    let left =  parseFloat(elmObj.data('left').replace('px'))*hr;
+                    elmObj.css({'top':top+'px', 'left':left+'px'});
+                }
+                if(elmObj.tagName() == "img"){
+
+                    elmObj.css({
+                        "width": w,
+                        "height": h,
+                        // "font-size": f
+                    });
+                }else{
+                    elmObj.css({
+                        "width": w,
+                        "height": h,
+                        "font-size": f
+                    });
+                }
+            });
+
+}
+
 
 function simulateClick(id) {
   var event = new MouseEvent('resize', {
@@ -152,9 +206,10 @@ let plotSlide = (slideHtml)=>{
     ls.tools.log(slidewidth*scale+'px', slideheight*scale+'px',scale);
     // console.log(slideHtml);
     $('#holder').html(slideHtml);
-    applyresizing('#holder .slide')
+    beforeresizing('#holder .slide')
 
-    $('#holder .slide, #holder .slide').css({'width': (slidewidth*scale) +'px', 'height':(slideheight*scale) +'px'});
+    $('#holder .slide').css({'width': (slidewidth*scale) +'px', 'height':(slideheight*scale) +'px'});
+     applyresizing('#holder .slide')
     $('#holder .slide .ui-resizable-handle:last').trigger('mousemove')
     // applyresizing('#holder')
     // applyresizing('#holder > .slide')
