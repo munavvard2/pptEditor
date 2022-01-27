@@ -65,6 +65,21 @@ let updatehtmlSlides = function(){
         htmlSlides.push($(this).find('.slideContent').html())
     })
 }
+let scaleToDefaultSize = function(target){
+
+    // target = '#holder .slide';
+    let defaultWidth = 1280; // in px
+    let actualWidth = $(target).css('width').replace('px','');
+    let actualHeight = $(target).css('height').replace('px','');
+    let scale = defaultWidth/ actualWidth  ;
+    let defaultHeight = actualHeight * scale; // in px
+    ls.tools.log(actualWidth,actualHeight,defaultHeight, scale)
+
+    beforerescalling(target)
+    $(target).css({'width': defaultWidth +'px', 'height':defaultHeight +'px'});
+    applyrescalling(target)
+
+}
 
 
 
@@ -86,12 +101,9 @@ let plotSideSlides = (slides, style)=>{
 };
 
 // http://jsfiddle.net/no9cq5xk/    https://stackoverflow.com/questions/31246837/jquery-ui-resizable-resize-all-child-elements-and-its-font-size
-window.beforeresizing = function(parentElement){
+window.beforerescalling = function(parentElement){
 
-    console.clear();
-    console.log(parentElement);
     $(parentElement).each(function(){
-        console.log('setting parent heights');
         $(this).data("height", $(this).outerHeight());
         $(this).data("width", $(this).outerWidth());
 
@@ -101,11 +113,9 @@ window.beforeresizing = function(parentElement){
     $(parentElement+' *').each(function(){
 
         if($(this).hasClass('block')){
-            console.log($(this));
                 $(this).data('top',$(this).css('top'));
                 $(this).data('left',$(this).css('left'));
             }
-        console.log('setting heights..');
         $(this).data("height", $(this).outerHeight());
         $(this).data("width", $(this).outerWidth());
         $(this).data("fontSize", parseInt($(this).css("font-size")));
@@ -113,8 +123,8 @@ window.beforeresizing = function(parentElement){
 
     $(parentElement).resizable({
         resize: function (e, ui) {
-                var wr = $(parentElement).outerWidth()/$(parentElement).data("width");
-                var hr = $(parentElement).outerHeight()/$(parentElement).data("height");
+               var wr = $(parentElement).outerWidth()/$(parentElement).data("width");
+               var hr = $(parentElement).outerHeight()/$(parentElement).data("height");
 
                 $(parentElement).find("*").each(function (i, elm) {
 
@@ -123,11 +133,16 @@ window.beforeresizing = function(parentElement){
                 var h = elmObj.data("height") * hr;
                 // Adjusting font size according to smallest ratio
                 var f = elmObj.data("fontSize") * ((hr > wr) ? wr : hr);
+                if(elmObj.hasClass('block')){
+                    let top = parseFloat(elmObj.data('top').replace('px'))*wr;
+                    let left =  parseFloat(elmObj.data('left').replace('px'))*hr;
+                    elmObj.css({'top':top+'px', 'left':left+'px'});
+                }
                 if(elmObj.tagName() == "img"){
 
                     elmObj.css({
-                        "width": w+"!important",
-                        "height": h+"!important",
+                        "width": w,
+                        "height": h,
                         // "font-size": f
                     });
                 }else{
@@ -143,7 +158,7 @@ window.beforeresizing = function(parentElement){
     // simulateClick(parentElement)
 }
 
-window.applyresizing = function (parentElement){
+window.applyrescalling = function (parentElement){
 
 
         var wr = $(parentElement).outerWidth()/$(parentElement).data("width");
@@ -206,17 +221,17 @@ let plotSlide = (slideHtml)=>{
     ls.tools.log(slidewidth*scale+'px', slideheight*scale+'px',scale);
     // console.log(slideHtml);
     $('#holder').html(slideHtml);
-    beforeresizing('#holder .slide')
+    beforerescalling('#holder .slide')
 
     $('#holder .slide').css({'width': (slidewidth*scale) +'px', 'height':(slideheight*scale) +'px'});
-     applyresizing('#holder .slide')
+     applyrescalling('#holder .slide')
     $('#holder .slide .ui-resizable-handle:last').trigger('mousemove')
-    // applyresizing('#holder')
-    // applyresizing('#holder > .slide')
+    // applyrescalling('#holder')
+    // applyrescalling('#holder > .slide')
 
     //,
     // $('#holder > .slide').css({'width': slidewidth*scale +'px', 'height':slideheight*scale +'px'});
-    // applyresizing('#holder .slide')
+    // applyrescalling('#holder .slide')
 
 
     observer.observe($('#holder').get(0), config);
@@ -584,9 +599,13 @@ let generate = function() {
 
     pptx = new PptxGenJS();
     $.each(htmlSlides,(id,htmlSlide)=>{
+
+        scaleToDefaultSize('.slidesHolder > div[arrayid="'+id+'"] .slide');
+        htmlSlide = $('.slidesHolder > div[arrayid="'+id+'"] .slide').html();
+        // $('.slidesHolder > div[arrayid="'+id+'"]').html(htmlSlides[id]);
+
         let slide = pptx.addSlide(id); 
         let jsonConfig = ls.parseHtml($(htmlSlide),[]);
-        console.log(jsonConfig);
 
         $.each(jsonConfig,(type,config)=>{
             let configId = Object.keys(config)[0];
